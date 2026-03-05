@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "immediate_end_skills": [1, 2, 3, 4],
+  "main_axis": [
+    {"type": "skill", "op": 1},
+    {"type": "skill", "op": 2},
+    {"type": "skill", "op": 3},
+    {"type": "skill", "op": 4}
+  ]
+}

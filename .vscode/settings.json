@@ -41,6 +41,13 @@
                 "/tests/**/*.jsonc"
             ],
             "url": "/tools/schema/test.schema.json"
+        },
+        {
+            "fileMatch": [
+                "assets/resource/skill_axis/**/*.json",
+                "assets/resource/skill_axis/**/*.jsonc"
+            ],
+            "url": "/tools/schema/skill_axis.schema.json"
         }
     ],
     "files.associations": {
