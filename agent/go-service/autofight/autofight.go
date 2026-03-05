@@ -250,7 +250,7 @@ func (r *AutoFightExitRecognition) Run(ctx *maa.Context, arg *maa.CustomRecognit
 	if !pauseNotInFightSince.IsZero() && time.Since(pauseNotInFightSince) >= 10*time.Second {
 		log.Info().Dur("elapsed", time.Since(pauseNotInFightSince)).Msg("Pause timeout, exiting fight")
 		pauseNotInFightSince = time.Time{}
-		enemyInScreen = false // 下次进入 entry 后首次 Execute 再执行 LockTarget
+		resetFightParameter() // 重置技能序列和计数, 并重置 enemyInScreen, 下次进入 entry 后首次 Execute 再执行 LockTarget
 		return &maa.CustomRecognitionResult{
 			Box:    arg.Roi,
 			Detail: `{"custom": "exit pause timeout"}`,
@@ -261,7 +261,7 @@ func (r *AutoFightExitRecognition) Run(ctx *maa.Context, arg *maa.CustomRecognit
 	// 只要在战斗，一定会显示左下角干员条
 	if getCharactorLevelShow(ctx, arg) {
 		// saveExitImage(arg.Img, "character_level_show")
-		enemyInScreen = false // 下次进入 entry 后首次 Execute 再执行 LockTarget
+		resetFightParameter() // 重置技能序列和计数, 并重置 enemyInScreen, 下次进入 entry 后首次 Execute 再执行 LockTarget
 		return &maa.CustomRecognitionResult{
 			Box:    arg.Roi,
 			Detail: `{"custom": "charactor level show"}`,
@@ -343,6 +343,12 @@ var (
 	skillCycleIndex = 1
 	enemyInScreen   = false // 检查敌人是是否首次出现在屏幕
 )
+
+func resetFightParameter() {
+	actionQueue = nil
+	skillCycleIndex = 1
+	enemyInScreen = false
+}
 
 func enqueueAction(a fightAction) {
 	actionQueue = append(actionQueue, a)
