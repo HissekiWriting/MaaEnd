@@ -1,17 +1,153 @@
 package autofight
 
 import (
+	"encoding/json"
 	"fmt"
 	"image"
 	"image/png"
 	"os"
 	"path/filepath"
 	"sort"
+	"sync"
 	"time"
 
 	"github.com/MaaXYZ/maa-framework-go/v4"
 	"github.com/rs/zerolog/log"
 )
+
+type EndSkillEntry struct {
+	Kind     string `json:"kind"` // "permanent" or "temporary"
+	Operator int    `json:"operator"`
+}
+
+type AxisEntry struct {
+	SkillType     string `json:"type"` // "skill" or "end_skill"
+	SkillOperator int    `json:"operator"`
+}
+
+type SkillAxis struct {
+	ImmediateEndSkills []EndSkillEntry `json:"immediate_end_skills"`
+	MainAxis           []AxisEntry     `json:"main_axis"`
+}
+
+var (
+	axis         SkillAxis
+	axisMu       sync.RWMutex
+	skillAxisPos int
+)
+
+func loadSkillAxis(path string) error {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	var a SkillAxis
+	if err := json.Unmarshal(b, &a); err != nil {
+		return err
+	}
+	axisMu.Lock()
+	axis = a
+	skillAxisPos = 0
+	axisMu.Unlock()
+	return nil
+}
+
+func pickImmediateEndSkill(usable []int) (int, bool) {
+	axisMu.Lock()
+	defer axisMu.Unlock()
+
+	// 快速可查集合
+	usableSet := map[int]struct{}{}
+	for _, u := range usable {
+		usableSet[u] = struct{}{}
+	}
+	// 先找 temporary；找到后从列表中删除
+	for i, e := range axis.ImmediateEndSkills {
+		if e.Kind == "temporary" {
+			if _, ok := usableSet[e.Operator]; ok {
+				// 删除索引 i
+				axis.ImmediateEndSkills = append(axis.ImmediateEndSkills[:i], axis.ImmediateEndSkills[i+1:]...)
+				return e.Operator, true
+			}
+		}
+	}
+	// 再找 permanent
+	for _, e := range axis.ImmediateEndSkills {
+		if e.Kind == "permanent" {
+			if _, ok := usableSet[e.Operator]; ok {
+				return e.Operator, true
+			}
+		}
+	}
+	return 0, false
+}
+
+// 返回 operator, isEndSkill
+func getNextSkill(currentEndUsable []int) (int, bool) {
+	axisMu.Lock()
+	defer axisMu.Unlock()
+
+	axisLength := len(axis.MainAxis) // 记录轴的实际长度, 以便技能 id 循环
+	var checkWholeAxis bool = false
+	if axisLength == 0 {
+		return skillCycleIndex, false
+	}
+
+	usableSet := map[int]struct{}{}
+	for _, u := range currentEndUsable {
+		usableSet[u] = struct{}{}
+	}
+
+	for i := 0; ; i = (i + 1) % axisLength {
+		idx := (skillAxisPos + i) % axisLength
+		entry := axis.MainAxis[idx]
+
+		if entry.SkillType == "skill" {
+			// 普通战技，消费并 advance pos
+			skillAxisPos = (idx + 1) % axisLength
+			return entry.SkillOperator, false
+		}
+
+		if entry.SkillType == "end_skill" {
+			if _, ok := usableSet[entry.SkillOperator]; ok {
+				// 可用 -> 使用，并 advance pos
+				skillAxisPos = (idx + 1) % axisLength
+				return entry.SkillOperator, true
+			}
+			// 不可用 -> 加入临时 ImmediateEnds（如果还没有），并跳过到下一个条目
+			already := false
+			for _, e := range axis.ImmediateEndSkills {
+				if e.Operator == entry.SkillOperator {
+					already = true
+					break
+				}
+			}
+			if !already {
+				axis.ImmediateEndSkills = append(axis.ImmediateEndSkills, EndSkillEntry{Operator: entry.SkillOperator, Kind: "temporary"})
+			}
+			// 跳过这个 entry，继续循环
+			if i+1 == axisLength && checkWholeAxis {
+				break // 已经检查过一轮了，避免死循环，退出
+			} else if i+1 == axisLength {
+				checkWholeAxis = true
+			}
+			continue
+		}
+	}
+
+	// 若无匹配，退回到以前的 skillCycleIndex 行为 (战技 1, 2, 3, 4 轮流放)
+	if skillCycleIndex > 0 {
+		// advance original cycle index
+		op := skillCycleIndex
+		if op >= 4 {
+			skillCycleIndex = 1
+		} else {
+			skillCycleIndex = op + 1
+		}
+		return op, false
+	}
+	return 1, false
+}
 
 func getCharactorLevelShow(ctx *maa.Context, arg *maa.CustomRecognitionArg) bool {
 	detail, err := ctx.RunRecognition("__AutoFightRecognitionCharactorLevelShow", arg.Img)
@@ -348,6 +484,16 @@ func resetFightParameter() {
 	actionQueue = nil
 	skillCycleIndex = 1
 	enemyInScreen = false
+	axisMu.Lock()
+	filtered := axis.ImmediateEndSkills[:0]
+	for _, e := range axis.ImmediateEndSkills {
+		if e.Kind == "permanent" {
+			filtered = append(filtered, e)
+		}
+	}
+	// 清理终局时仍没有顺利释放的 temporary 终结技任务
+	axis.ImmediateEndSkills = filtered
+	axisMu.Unlock()
 }
 
 func enqueueAction(a fightAction) {
@@ -381,38 +527,63 @@ func dequeueAction() (fightAction, bool) {
 
 // 识别干员技能释放
 func recognitionSkill(ctx *maa.Context, arg *maa.CustomRecognitionArg) {
+	if arg == nil || arg.Img == nil {
+		return
+	}
+
+	// 连携技能优先（保持原逻辑）
 	if hasComboShow(ctx, arg) {
-		// 连携技能
 		enqueueAction(fightAction{
 			executeAt: time.Now(),
 			action:    ActionCombo,
 		})
-	} else if endSkillUsable := getEndSkillUsable(ctx, arg); len(endSkillUsable) > 0 {
-		// 终结技可用
-		for _, idx := range endSkillUsable {
+		return
+	}
+
+	// 本帧可用的终结技列表
+	currentEndUsable := getEndSkillUsable(ctx, arg)
+
+	// pickImmediateEndSkill 应当在释放 temporary 后从列表中移除该项。
+	if operatorID, usable := pickImmediateEndSkill(currentEndUsable); usable {
+		enqueueAction(fightAction{
+			executeAt: time.Now(),
+			action:    ActionEndSkillKeyDown,
+			operator:  operatorID,
+		})
+		enqueueAction(fightAction{
+			executeAt: time.Now().Add(1500 * time.Millisecond),
+			action:    ActionEndSkillKeyUp,
+			operator:  operatorID,
+		})
+		return
+	}
+
+	// 没有 ImmediateEnd 可释放，按轴序列取下一个动作（可能为普通技或 end_skill）
+	if getEnergyLevel(ctx, arg) >= 1 {
+		// 约定：getNextSkill 返回 (operator, isEndSkill)
+		operatorID, isEnd := getNextSkill(currentEndUsable)
+		if operatorID == 0 {
+			return
+		}
+		if isEnd {
+			// 如果 getNextSkill 决定使用 end_skill，则按终结技流程入队（并且如果该 end_skill 是之前被标记为 temporary，
+			// pickImmediateEndSkill / getNextSkill 的实现应负责在释放后移除它）
 			enqueueAction(fightAction{
 				executeAt: time.Now(),
 				action:    ActionEndSkillKeyDown,
-				operator:  idx,
+				operator:  operatorID,
 			})
 			enqueueAction(fightAction{
 				executeAt: time.Now().Add(1500 * time.Millisecond),
 				action:    ActionEndSkillKeyUp,
-				operator:  idx,
+				operator:  operatorID,
 			})
-			break
-		}
-	} else if getEnergyLevel(ctx, arg) >= 1 {
-		idx := skillCycleIndex
-		enqueueAction(fightAction{
-			executeAt: time.Now(),
-			action:    ActionSkill,
-			operator:  idx,
-		})
-		if idx >= 4 {
-			skillCycleIndex = 1
 		} else {
-			skillCycleIndex = idx + 1
+			enqueueAction(fightAction{
+				executeAt: time.Now(),
+				action:    ActionSkill,
+				operator:  operatorID,
+			})
 		}
 	}
 }

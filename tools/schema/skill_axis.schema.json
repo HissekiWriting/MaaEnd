@@ -4,7 +4,21 @@
   "properties": {
     "immediate_end_skills": {
       "type": "array",
-      "items": {"type": "integer"}
+      "items": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["permanent", "temporary"]
+          },
+          "operator": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4
+          }
+        },
+        "required": ["kind", "operator"]
+      }
     },
     "main_axis": {
       "type": "array",
@@ -21,7 +35,7 @@
             "maximum": 4
           }
         },
-        "required": ["type", "op"]
+        "required": ["type", "operator"]
       }
     }
   },
