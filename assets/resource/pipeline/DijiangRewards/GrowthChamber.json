@@ -37,6 +37,7 @@
                 "box_index": 1
             }
         },
+        "pre_delay": 0,
         "action": {
             "type": "Click"
         },
@@ -44,6 +45,8 @@
             "time": 150,
             "timeout": 2000
         },
+        "post_delay": 0,
+        "rate_limit": 0,
         "next": [
             "ClaimAllGrowRewardClose"
         ]
@@ -61,9 +64,12 @@
             "time": 80,
             "timeout": 1000
         },
+        "pre_delay": 0,
         "action": {
             "type": "Click"
         },
+        "post_delay": 0,
+        "rate_limit": 0,
         "next": [
             "Grow",
             "ExitGrowthChamber"
@@ -86,6 +92,7 @@
                 ]
             }
         },
+        "pre_delay": 0,
         "action": {
             "type": "Click"
         },
@@ -93,6 +100,8 @@
             "time": 150,
             "timeout": 2000
         },
+        "post_delay": 0,
+        "rate_limit": 0,
         "next": [
             "InGrow"
         ]
@@ -213,6 +222,9 @@
                 ]
             }
         },
+        "pre_delay": 0,
+        "post_delay": 0,
+        "rate_limit": 0,
         "next": [
             "ExitGrowthChamber"
         ]
@@ -233,6 +245,9 @@
                 ]
             }
         },
+        "pre_delay": 0,
+        "post_delay": 0,
+        "rate_limit": 0,
         "next": [
             "GrayCancelButton"
         ]
@@ -402,9 +417,12 @@
                 ]
             }
         },
+        "pre_delay": 0,
         "action": {
             "type": "Click"
         },
+        "post_delay": 0,
+        "rate_limit": 0,
         "next": [
             "ChooseSortBy",
             "[JumpBack]SwipeChooseSortBy"
@@ -429,9 +447,12 @@
                 ]
             }
         },
+        "pre_delay": 0,
         "action": {
             "type": "Click"
-        }
+        },
+        "post_delay": 0,
+        "rate_limit": 0
     },
     "SwipeChooseSortBy": {
         "desc": "选择排序方式时候滚动一次",
@@ -453,12 +474,15 @@
                 ]
             }
         },
+        "pre_delay": 0,
         "action": {
             "type": "Scroll",
             "param": {
                 "dx": 120
             }
-        }
+        },
+        "post_delay": 0,
+        "rate_limit": 0
     },
     "SortOrder": {
         "desc": "排序,选择正序或者倒序",
@@ -480,9 +504,12 @@
                 ]
             }
         },
+        "pre_delay": 0,
         "action": {
             "type": "Click"
-        }
+        },
+        "post_delay": 0,
+        "rate_limit": 0
     },
     "ExitGrowthChamber": {
         "desc": "[培养舱·离开] 返回控制中枢",
