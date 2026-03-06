@@ -36,6 +36,23 @@ var (
 	skillAxisPos int
 )
 
+func getSkillAxisPath() string {
+	// 获取当前执行文件的目录
+	execPath, err := os.Executable()
+	if err != nil {
+		// 如果获取失败，回退到相对路径
+		return "assets/resource/skill_axis/DefaultAxis.json"
+	}
+
+	execDir := filepath.Dir(execPath)
+
+	// 从执行文件目录向上到项目根目录，然后到资源文件
+	// 向上到项目根目录, 然后得到轴文件路径
+	axisPath := filepath.Join(execDir, "../../assets/resource/skill_axis/DefaultAxis.json")
+
+	return filepath.Clean(axisPath)
+}
+
 func loadSkillAxis(path string) error {
 	b, err := os.ReadFile(path)
 	if err != nil {
@@ -49,6 +66,13 @@ func loadSkillAxis(path string) error {
 	axis = a
 	skillAxisPos = 0
 	axisMu.Unlock()
+
+	log.Info().
+		Str("path", path).
+		Int("mainAxisLen", len(axis.MainAxis)).
+		Int("immediateEndLen", len(axis.ImmediateEndSkills)).
+		Msg("skill axis loaded")
+
 	return nil
 }
 
@@ -134,18 +158,19 @@ func getNextSkill(currentEndUsable []int) (int, bool) {
 			continue
 		}
 	}
-
-	// 若无匹配，退回到以前的 skillCycleIndex 行为 (战技 1, 2, 3, 4 轮流放)
-	if skillCycleIndex > 0 {
-		// advance original cycle index
-		op := skillCycleIndex
-		if op >= 4 {
-			skillCycleIndex = 1
-		} else {
-			skillCycleIndex = op + 1
+	/*
+		// 若无匹配，退回到以前的 skillCycleIndex 行为 (战技 1, 2, 3, 4 轮流放)
+		if skillCycleIndex > 0 {
+			// advance original cycle index
+			op := skillCycleIndex
+			if op >= 4 {
+				skillCycleIndex = 1
+			} else {
+				skillCycleIndex = op + 1
+			}
+			return op, false
 		}
-		return op, false
-	}
+	*/
 	return 1, false
 }
 
@@ -327,7 +352,15 @@ func (r *AutoFightEntryRecognition) Run(ctx *maa.Context, arg *maa.CustomRecogni
 	if !isEntryFightScene(ctx, arg) {
 		return nil, false
 	}
-
+	// TODO 读轴, 暂时放在这里, 只用来测一下能不能正常跑, 以后找更合理的位置
+	axisPath := getSkillAxisPath()
+	if err := loadSkillAxis(axisPath); err != nil {
+		log.Warn().
+			Err(err).
+			Str("path", axisPath).
+			Msg("failed to load skill axis, using defaults")
+	}
+	////////
 	detail, err := ctx.RunRecognition("__AutoFightRecognitionFightSkill", arg.Img)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to run recognition for AutoFightRecognitionFightSkill")

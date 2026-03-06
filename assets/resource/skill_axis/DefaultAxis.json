@@ -1,15 +1,19 @@
 {
   "version": 1,
   "immediate_end_skills": [
-    {"kind": "permanent", "operator": 1},
     {"kind": "permanent", "operator": 2},
-    {"kind": "permanent", "operator": 3},
-    {"kind": "permanent", "operator": 4}
+    {"kind": "permanent", "operator": 3}
  ],
   "main_axis": [
-    {"type": "skill", "operator": 1},
-    {"type": "skill", "operator": 2},
+    {"type": "skill", "operator": 4},
     {"type": "skill", "operator": 3},
-    {"type": "skill", "operator": 4}
+    {"type": "skill", "operator": 3},
+    {"type": "skill", "operator": 1},
+    {"type": "end_skill", "operator":1},
+    {"type": "skill", "operator": 3},
+    {"type": "skill", "operator": 2},
+    {"type": "skill", "operator": 4},
+    {"type": "end_skill", "operator": 4},
+    {"type": "skill", "operator": 1}
   ]
 }
