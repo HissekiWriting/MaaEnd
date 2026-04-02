@@ -1,0 +1,143 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "MaaEnd Fight Axis Configuration",
+    "description": "战斗排轴协议，用于描述自动战斗中技能释放的优先级、顺序与约束关系。",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "version",
+        "name",
+        "immediate_cast",
+        "sequential_cast"
+    ],
+    "properties": {
+        "version": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "协议版本号"
+        },
+        "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "排轴配置名称"
+        },
+        "description": {
+            "type": "string",
+            "description": "排轴配置说明"
+        },
+        "battle_mode": {
+            "type": "string",
+            "enum": [
+                "realtime",
+                "manual",
+                "custom"
+            ],
+            "description": "适用的战斗模式"
+        },
+        "operator_count": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4,
+            "description": "参与排轴的干员数量"
+        },
+        "immediate_cast": {
+            "type": "array",
+            "description": "检测到满足条件时立刻释放的技能列表，仅允许终结技，且不得与 sequential_cast 重复",
+            "items": {
+                "$ref": "#/$defs/immediateCastItem"
+            },
+            "uniqueItems": true
+        },
+        "sequential_cast": {
+            "type": "array",
+            "description": "依次释放的技能列表，允许一般战技、连携技、终结技，但不得与 immediate_cast 交集",
+            "items": {
+                "$ref": "#/$defs/sequentialCastItem"
+            },
+            "uniqueItems": true
+        },
+        "metadata": {
+            "type": "object",
+            "description": "扩展元数据，不参与核心校验",
+            "additionalProperties": true
+        }
+    },
+    "$defs": {
+        "skillType": {
+            "type": "string",
+            "enum": [
+                "skill",
+                "combo",
+                "ultimate"
+            ],
+            "description": "技能类型：一般战技、连携技、终结技"
+        },
+        "operatorId": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4,
+            "description": "角色对象 id，限制为 1~4 的正整数"
+        },
+        "skillRef": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "type",
+                "operator_id"
+            ],
+            "properties": {
+                "type": {
+                    "$ref": "#/$defs/skillType"
+                },
+                "operator_id": {
+                    "$ref": "#/$defs/operatorId"
+                }
+            }
+        },
+        "immediateCastItem": {
+            "allOf": [
+                {
+                    "$ref": "#/$defs/skillRef"
+                },
+                {
+                    "properties": {
+                        "type": {
+                            "const": "ultimate"
+                        }
+                    }
+                }
+            ]
+        },
+        "sequentialCastItem": {
+            "allOf": [
+                {
+                    "$ref": "#/$defs/skillRef"
+                },
+                {
+                    "properties": {
+                        "delay_ms": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "description": "相对前一个排轴动作的延迟，单位毫秒"
+                        },
+                        "window_ms": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "description": "可执行时间窗，单位毫秒"
+                        },
+                        "priority": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "description": "同一时刻的内部优先级，数值越大优先级越高"
+                        },
+                        "trigger": {
+                            "type": "object",
+                            "description": "触发条件扩展，供后续接入阶段、血量、能量等约束",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}

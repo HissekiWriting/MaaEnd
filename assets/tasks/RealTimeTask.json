@@ -20,7 +20,9 @@
                 "Win32-Window",
                 "Win32-Front"
             ],
-            "group": ["realtime"]
+            "group": [
+                "realtime"
+            ]
         }
     ],
     "option": {
@@ -301,7 +303,8 @@
                         }
                     },
                     "option": [
-                        "AutoFightAttack"
+                        "AutoFightAttack",
+                        "AutoFightAxisFile"
                     ]
                 },
                 {
@@ -337,6 +340,20 @@
                             }
                         }
                     }
+                }
+            ]
+        },
+        "AutoFightAxisFile": {
+            "type": "input",
+            "label": "$option.AutoFightAxisFile.label",
+            "description": "$option.AutoFightAxisFile.description",
+            "inputs": [
+                {
+                    "name": "AutoFightAxisFilePath",
+                    "label": "$option.AutoFightAxisFile.inputs.AutoFightAxisFilePath.label",
+                    "description": "$option.AutoFightAxisFile.inputs.AutoFightAxisFilePath.description",
+                    "pipeline_type": "string",
+                    "default": "assets/resource/pipeline/AutoFightAxis/default.json"
                 }
             ]
         },
