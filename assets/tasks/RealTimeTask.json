@@ -303,8 +303,7 @@
                         }
                     },
                     "option": [
-                        "AutoFightAttack",
-                        "AutoFightAxisFile"
+                        "AutoFightAttack"
                     ]
                 },
                 {
@@ -340,20 +339,6 @@
                             }
                         }
                     }
-                }
-            ]
-        },
-        "AutoFightAxisFile": {
-            "type": "input",
-            "label": "$option.AutoFightAxisFile.label",
-            "description": "$option.AutoFightAxisFile.description",
-            "inputs": [
-                {
-                    "name": "AutoFightAxisFilePath",
-                    "label": "$option.AutoFightAxisFile.inputs.AutoFightAxisFilePath.label",
-                    "description": "$option.AutoFightAxisFile.inputs.AutoFightAxisFilePath.description",
-                    "pipeline_type": "string",
-                    "default": "assets/resource/pipeline/AutoFightAxis/default.json"
                 }
             ]
         },
