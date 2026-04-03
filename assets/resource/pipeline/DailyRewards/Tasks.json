@@ -104,16 +104,7 @@
             "type": "Click",
             "param": {}
         },
-        "post_wait_freezes": {
-            "time": 100,
-            "target": [
-                160,
-                200,
-                180,
-                350
-            ]
-        },
-        "post_delay": 0,
+        "post_delay": 400, // 画面变化太小了，不适合wait_freeze
         "rate_limit": 0
     },
     "DailyTaskClaimActivityRewards": {
@@ -200,10 +191,10 @@
             "type": "OCR",
             "param": {
                 "roi": [
-                    800,
-                    200,
-                    400,
-                    380
+                    330,
+                    520,
+                    500,
+                    100
                 ],
                 "expected": [
                     "今日活跃度已达上限",

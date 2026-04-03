@@ -10,6 +10,15 @@
         ],
         "template": "CreditShopping/CreditShoppingTabSelected.png",
         "threshold": 0.7,
+        "post_wait_freezes": {
+            "time": 200,
+            "target": [
+                52,
+                98,
+                1186,
+                548
+            ]
+        },
         "next": [
             "CreditShoppingInit",
             "CreditShoppingScanItem"
@@ -260,6 +269,7 @@
             "IsDiscountPriority1"
         ],
         "box_index": 4,
+        "pre_wait_freezes": 100,
         "action": "Click",
         "target_offset": [
             -30,
@@ -283,6 +293,7 @@
             "IsDiscountPriority2"
         ],
         "box_index": 4,
+        "pre_wait_freezes": 100,
         "action": "Click",
         "target_offset": [
             -30,
@@ -305,6 +316,7 @@
             "IsDiscountPriority3"
         ],
         "box_index": 4,
+        "pre_wait_freezes": 100,
         "action": "Click",
         "target_offset": [
             -30,
@@ -325,6 +337,7 @@
             "CanAfford"
         ],
         "box_index": 2,
+        "pre_wait_freezes": 100,
         "action": "Click",
         "next": [
             "CreditShoppingBuyItem"
@@ -364,6 +377,7 @@
                 "box_index": 1
             }
         },
+        "pre_wait_freezes": 100,
         "action": {
             "type": "Click"
         },
@@ -413,6 +427,7 @@
                 "box_index": 1
             }
         },
+        "pre_wait_freezes": 100,
         "action": {
             "type": "Click"
         },
