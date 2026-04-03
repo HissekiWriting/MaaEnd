@@ -155,6 +155,9 @@ func resolveFightAxisContent(arg *maa.CustomActionArg) ([]byte, error) {
 	}
 	input := strings.TrimSpace(params.Input)
 	source := strings.TrimSpace(strings.Trim(params.Source, "{}"))
+	if source == "" {
+		source = inferFightAxisSource(input)
+	}
 	switch strings.ToLower(source) {
 	case "file_path":
 		if input == "" {
@@ -173,6 +176,16 @@ func resolveFightAxisContent(arg *maa.CustomActionArg) ([]byte, error) {
 	default:
 		return nil, fmt.Errorf("unsupported fight axis source: %s", params.Source)
 	}
+}
+
+func inferFightAxisSource(input string) string {
+	if input == "" {
+		return ""
+	}
+	if strings.ContainsAny(input, `\\/`) || strings.HasSuffix(strings.ToLower(input), ".json") {
+		return "file_path"
+	}
+	return "data_code"
 }
 
 func validateFightAxisContent(content []byte) error {
