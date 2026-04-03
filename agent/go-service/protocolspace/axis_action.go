@@ -154,7 +154,8 @@ func resolveFightAxisContent(arg *maa.CustomActionArg) ([]byte, error) {
 		return nil, fmt.Errorf("parse fight axis action param: %w", err)
 	}
 	input := strings.TrimSpace(params.Input)
-	switch strings.TrimSpace(strings.ToLower(params.Source)) {
+	source := strings.TrimSpace(strings.Trim(params.Source, "{}"))
+	switch strings.ToLower(source) {
 	case "file_path":
 		if input == "" {
 			return nil, fmt.Errorf("file path is empty")
@@ -240,8 +241,21 @@ func restoreDefaultFightAxis() error {
 }
 
 func resolveFightAxisPath(relativePath string) string {
+	if filepath.IsAbs(relativePath) {
+		return relativePath
+	}
+
+	searchBases := []string{}
+	if exePath, err := os.Executable(); err == nil {
+		exeDir := filepath.Dir(exePath)
+		searchBases = append(searchBases, exeDir, filepath.Dir(exeDir), filepath.Dir(filepath.Dir(exeDir)))
+	}
 	if cwd, err := os.Getwd(); err == nil {
-		candidate := filepath.Join(cwd, relativePath)
+		searchBases = append(searchBases, cwd, filepath.Dir(cwd), filepath.Dir(filepath.Dir(cwd)))
+	}
+
+	for _, base := range searchBases {
+		candidate := filepath.Join(base, relativePath)
 		if _, statErr := os.Stat(candidate); statErr == nil {
 			return candidate
 		}

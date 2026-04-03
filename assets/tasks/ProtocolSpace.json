@@ -334,11 +334,7 @@
                             "enabled": false
                         },
                         "ProtocolSpaceFightAxisImportAction": {
-                            "enabled": true,
-                            "custom_action_param": {
-                                "source": "{ProtocolSpaceFightAxisSource}",
-                                "input": "{ProtocolSpaceFightAxisInputText}"
-                            }
+                            "enabled": true
                         }
                     }
                 }
@@ -351,11 +347,25 @@
             "cases": [
                 {
                     "name": "ProtocolSpaceFightAxisSourceFilePath",
-                    "label": "$option.ProtocolSpaceFightAxisSource.case.ProtocolSpaceFightAxisSourceFilePath.label"
+                    "label": "$option.ProtocolSpaceFightAxisSource.case.ProtocolSpaceFightAxisSourceFilePath.label",
+                    "pipeline_override": {
+                        "ProtocolSpaceFightAxisImportAction": {
+                            "custom_action_param": {
+                                "source": "file_path"
+                            }
+                        }
+                    }
                 },
                 {
                     "name": "ProtocolSpaceFightAxisSourceDataCode",
-                    "label": "$option.ProtocolSpaceFightAxisSource.case.ProtocolSpaceFightAxisSourceDataCode.label"
+                    "label": "$option.ProtocolSpaceFightAxisSource.case.ProtocolSpaceFightAxisSourceDataCode.label",
+                    "pipeline_override": {
+                        "ProtocolSpaceFightAxisImportAction": {
+                            "custom_action_param": {
+                                "source": "data_code"
+                            }
+                        }
+                    }
                 }
             ]
         },
@@ -370,7 +380,14 @@
                     "description": "$option.ProtocolSpaceFightAxisInput.inputs.ProtocolSpaceFightAxisInputText.description",
                     "pipeline_type": "string"
                 }
-            ]
+            ],
+            "pipeline_override": {
+                "ProtocolSpaceFightAxisImportAction": {
+                    "custom_action_param": {
+                        "input": "{ProtocolSpaceFightAxisInputText}"
+                    }
+                }
+            }
         },
         "OperatorProgression": {
             "type": "select",
