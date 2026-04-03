@@ -516,16 +516,37 @@
                     "type": "integer",
                     "minimum": 0,
                     "description": "相对前一个排轴动作的延迟，单位毫秒"
+                }
+            }
+        },
+        "ultimateSequentialCastItem": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "type",
+                "operator_id",
+                "window_ms"
+            ],
+            "properties": {
+                "type": {
+                    "const": "ultimate"
                 },
-                "priority": {
+                "operator_id": {
+                    "$ref": "#/$defs/operatorId"
+                },
+                "window_ms": {
                     "type": "integer",
                     "minimum": 0,
-                    "description": "同一时刻的内部优先级，数值越大优先级越高"
+                    "description": "可执行时间窗，单位毫秒"
                 },
-                "trigger": {
-                    "type": "object",
-                    "description": "触发条件扩展，供后续接入阶段、血量、能量等约束",
-                    "additionalProperties": true
+                "delay_ms": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "相对前一个排轴动作的延迟，单位毫秒"
+                },
+                "allow_remedy": {
+                    "const": 1,
+                    "description": "允许补救标记，仅限 1"
                 }
             }
         },
@@ -557,17 +578,14 @@
                                     "type": "integer",
                                     "minimum": 0,
                                     "description": "可执行时间窗，单位毫秒"
-                                },
-                                "priority": {
-                                    "type": "integer",
-                                    "minimum": 0,
-                                    "description": "同一时刻的内部优先级，数值越大优先级越高"
-                                },
-                                "trigger": {
-                                    "type": "object",
-                                    "description": "触发条件扩展，供后续接入阶段、血量、能量等约束",
-                                    "additionalProperties": true
                                 }
+                            }
+                        },
+                        {
+                            "not": {
+                                "required": [
+                                    "allow_remedy"
+                                ]
                             }
                         },
                         {
@@ -583,8 +601,21 @@
                             },
                             "then": {
                                 "required": [
-                                    "window_ms"
-                                ]
+                                    "window_ms",
+                                    "allow_remedy"
+                                ],
+                                "properties": {
+                                    "allow_remedy": {
+                                        "const": 1
+                                    }
+                                }
+                            },
+                            "else": {
+                                "not": {
+                                    "required": [
+                                        "allow_remedy"
+                                    ]
+                                }
                             }
                         }
                     ]

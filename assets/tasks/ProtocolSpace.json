@@ -312,11 +312,63 @@
             "cases": [
                 {
                     "name": "ProtocolSpaceFightAxisPresetDefault",
-                    "label": "$option.ProtocolSpaceFightAxisPreset.case.ProtocolSpaceFightAxisPresetDefault.label"
+                    "label": "$option.ProtocolSpaceFightAxisPreset.case.ProtocolSpaceFightAxisPresetDefault.label",
+                    "pipeline_override": {
+                        "ProtocolSpaceFightAxisLoadDefault": {
+                            "enabled": true
+                        },
+                        "ProtocolSpaceFightAxisImportAction": {
+                            "enabled": false
+                        }
+                    }
                 },
                 {
                     "name": "ProtocolSpaceFightAxisPresetCustom",
-                    "label": "$option.ProtocolSpaceFightAxisPreset.case.ProtocolSpaceFightAxisPresetCustom.label"
+                    "label": "$option.ProtocolSpaceFightAxisPreset.case.ProtocolSpaceFightAxisPresetCustom.label",
+                    "option": [
+                        "ProtocolSpaceFightAxisSource",
+                        "ProtocolSpaceFightAxisInput"
+                    ],
+                    "pipeline_override": {
+                        "ProtocolSpaceFightAxisLoadDefault": {
+                            "enabled": false
+                        },
+                        "ProtocolSpaceFightAxisImportAction": {
+                            "enabled": true,
+                            "custom_action_param": {
+                                "source": "{ProtocolSpaceFightAxisSource}",
+                                "input": "{ProtocolSpaceFightAxisInputText}"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        "ProtocolSpaceFightAxisSource": {
+            "type": "select",
+            "label": "$option.ProtocolSpaceFightAxisSource.label",
+            "default_case": "ProtocolSpaceFightAxisSourceFilePath",
+            "cases": [
+                {
+                    "name": "ProtocolSpaceFightAxisSourceFilePath",
+                    "label": "$option.ProtocolSpaceFightAxisSource.case.ProtocolSpaceFightAxisSourceFilePath.label"
+                },
+                {
+                    "name": "ProtocolSpaceFightAxisSourceDataCode",
+                    "label": "$option.ProtocolSpaceFightAxisSource.case.ProtocolSpaceFightAxisSourceDataCode.label"
+                }
+            ]
+        },
+        "ProtocolSpaceFightAxisInput": {
+            "type": "input",
+            "label": "$option.ProtocolSpaceFightAxisInput.label",
+            "description": "$option.ProtocolSpaceFightAxisInput.description",
+            "inputs": [
+                {
+                    "name": "ProtocolSpaceFightAxisInputText",
+                    "label": "$option.ProtocolSpaceFightAxisInput.inputs.ProtocolSpaceFightAxisInputText.label",
+                    "description": "$option.ProtocolSpaceFightAxisInput.inputs.ProtocolSpaceFightAxisInputText.description",
+                    "pipeline_type": "string"
                 }
             ]
         },

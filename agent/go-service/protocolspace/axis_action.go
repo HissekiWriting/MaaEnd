@@ -1,6 +1,7 @@
 package protocolspace
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -15,6 +16,8 @@ import (
 var (
 	_ maa.CustomActionRunner = &FightAxisCopyAction{}
 	_ maa.CustomActionRunner = &FightAxisImportAction{}
+	_ maa.CustomActionRunner = &FightAxisLoadDefaultAction{}
+	_ maa.CustomActionRunner = &FightAxisLoadCustomAction{}
 )
 
 const (
@@ -22,8 +25,34 @@ const (
 	fightAxisUserFile    = "assets/fight_axis/user_axis.json"
 )
 
+type fightAxisActionParam struct {
+	Source string `json:"source"`
+	Input  string `json:"input"`
+}
+
+type fightAxisConfig struct {
+	Version        int             `json:"version"`
+	Name           string          `json:"name"`
+	Description    string          `json:"description"`
+	BattleMode     string          `json:"battle_mode"`
+	OperatorCount  int             `json:"operator_count"`
+	ImmediateCast  []fightAxisCast `json:"immediate_cast"`
+	SequentialCast []fightAxisCast `json:"sequential_cast"`
+}
+
+type fightAxisCast struct {
+	Type       string `json:"type"`
+	OperatorID int    `json:"operator_id,omitempty"`
+}
+
 // FightAxisCopyAction copies the custom fight axis file content to the clipboard.
 type FightAxisCopyAction struct{}
+
+// FightAxisLoadDefaultAction activates the default fight axis.
+type FightAxisLoadDefaultAction struct{}
+
+// FightAxisLoadCustomAction activates the custom fight axis or falls back to default if invalid.
+type FightAxisLoadCustomAction struct{}
 
 // Run copies user_axis.json content to clipboard and shows a confirmation message.
 func (a *FightAxisCopyAction) Run(ctx *maa.Context, arg *maa.CustomActionArg) bool {
@@ -32,15 +61,52 @@ func (a *FightAxisCopyAction) Run(ctx *maa.Context, arg *maa.CustomActionArg) bo
 	content, err := os.ReadFile(resolveFightAxisPath(fightAxisUserFile))
 	if err != nil {
 		log.Error().Err(err).Str("file", fightAxisUserFile).Msg("failed to read custom fight axis file")
-		showMessageBox("提示", "读取自定义排轴文件失败")
 		return false
 	}
 	if err := writeClipboard(string(content)); err != nil {
 		log.Error().Err(err).Str("file", fightAxisUserFile).Msg("failed to copy custom fight axis file to clipboard")
-		showMessageBox("提示", "复制自定义排轴文件失败")
 		return false
 	}
-	showMessageBox("提示", "已复制自定义排轴文件内容")
+	log.Info().Str("component", "FightAxisCopyAction").Msg("copied custom fight axis content to clipboard")
+	return true
+}
+
+// Run restores the default fight axis into user_axis.json.
+func (a *FightAxisLoadDefaultAction) Run(ctx *maa.Context, arg *maa.CustomActionArg) bool {
+	_ = ctx
+	_ = arg
+	if err := restoreDefaultFightAxis(); err != nil {
+		log.Error().Err(err).Str("component", "FightAxisLoadDefaultAction").Msg("failed to activate default fight axis")
+		return false
+	}
+	log.Info().Str("component", "FightAxisLoadDefaultAction").Msg("activated default fight axis")
+	return true
+}
+
+// Run validates the custom fight axis file and restores the default axis when the custom one is invalid.
+func (a *FightAxisLoadCustomAction) Run(ctx *maa.Context, arg *maa.CustomActionArg) bool {
+	_ = ctx
+	_ = arg
+	content, err := os.ReadFile(resolveFightAxisPath(fightAxisUserFile))
+	if err != nil {
+		log.Error().Err(err).Str("component", "FightAxisLoadCustomAction").Msg("failed to read custom fight axis")
+		if fallbackErr := restoreDefaultFightAxis(); fallbackErr != nil {
+			log.Error().Err(fallbackErr).Str("component", "FightAxisLoadCustomAction").Msg("failed to restore default fight axis")
+			return false
+		}
+		log.Warn().Str("component", "FightAxisLoadCustomAction").Msg("failed to read custom fight axis, restored default axis")
+		return false
+	}
+	if err := validateFightAxisContent(content); err != nil {
+		log.Error().Err(err).Str("component", "FightAxisLoadCustomAction").Msg("custom fight axis is invalid")
+		if fallbackErr := restoreDefaultFightAxis(); fallbackErr != nil {
+			log.Error().Err(fallbackErr).Str("component", "FightAxisLoadCustomAction").Msg("failed to restore default fight axis")
+			return false
+		}
+		log.Warn().Str("component", "FightAxisLoadCustomAction").Msg("custom fight axis invalid, restored default axis")
+		return false
+	}
+	log.Info().Str("component", "FightAxisLoadCustomAction").Msg("activated custom fight axis")
 	return true
 }
 
@@ -50,26 +116,127 @@ type FightAxisImportAction struct{}
 // Run opens a file picker, then replaces user_axis.json with the selected file content.
 func (a *FightAxisImportAction) Run(ctx *maa.Context, arg *maa.CustomActionArg) bool {
 	_ = ctx
-	_ = arg
-	selectedPath, err := pickJSONFile()
+	axisContent, err := resolveFightAxisContent(arg)
 	if err != nil {
-		log.Error().Err(err).Msg("failed to select fight axis json file")
-		showMessageBox("提示", "未选择可导入的 JSON 文件")
+		log.Error().Err(err).Str("component", "FightAxisImportAction").Msg("failed to resolve fight axis input")
+		if fallbackErr := restoreDefaultFightAxis(); fallbackErr != nil {
+			log.Error().Err(fallbackErr).Str("component", "FightAxisImportAction").Msg("failed to restore default fight axis")
+			return false
+		}
+		log.Warn().Str("component", "FightAxisImportAction").Msg("invalid fight axis input, restored default axis")
 		return false
 	}
-	content, err := os.ReadFile(selectedPath)
-	if err != nil {
-		log.Error().Err(err).Str("path", selectedPath).Msg("failed to read selected fight axis file")
-		showMessageBox("提示", "读取选中的 JSON 文件失败")
+	if err := validateFightAxisContent(axisContent); err != nil {
+		log.Error().Err(err).Str("component", "FightAxisImportAction").Msg("fight axis validation failed")
+		if fallbackErr := restoreDefaultFightAxis(); fallbackErr != nil {
+			log.Error().Err(fallbackErr).Str("component", "FightAxisImportAction").Msg("failed to restore default fight axis")
+			return false
+		}
+		log.Warn().Str("component", "FightAxisImportAction").Msg("fight axis validation failed, restored default axis")
 		return false
+	}
+	if err := os.WriteFile(resolveFightAxisPath(fightAxisUserFile), axisContent, 0644); err != nil {
+		log.Error().Err(err).Str("file", fightAxisUserFile).Msg("failed to overwrite custom fight axis file")
+		if fallbackErr := restoreDefaultFightAxis(); fallbackErr != nil {
+			log.Error().Err(fallbackErr).Str("component", "FightAxisImportAction").Msg("failed to restore default fight axis")
+			return false
+		}
+		log.Warn().Str("component", "FightAxisImportAction").Msg("failed to write custom fight axis file, restored default axis")
+		return false
+	}
+	log.Info().Str("component", "FightAxisImportAction").Msg("imported custom fight axis successfully")
+	return true
+}
+
+func resolveFightAxisContent(arg *maa.CustomActionArg) ([]byte, error) {
+	var params fightAxisActionParam
+	if err := json.Unmarshal([]byte(arg.CustomActionParam), &params); err != nil {
+		return nil, fmt.Errorf("parse fight axis action param: %w", err)
+	}
+	input := strings.TrimSpace(params.Input)
+	switch strings.TrimSpace(strings.ToLower(params.Source)) {
+	case "file_path":
+		if input == "" {
+			return nil, fmt.Errorf("file path is empty")
+		}
+		content, err := os.ReadFile(resolveFightAxisPath(input))
+		if err != nil {
+			return nil, fmt.Errorf("read fight axis file: %w", err)
+		}
+		return content, nil
+	case "data_code":
+		if input == "" {
+			return nil, fmt.Errorf("data code is empty")
+		}
+		return []byte(input), nil
+	default:
+		return nil, fmt.Errorf("unsupported fight axis source: %s", params.Source)
+	}
+}
+
+func validateFightAxisContent(content []byte) error {
+	var axis fightAxisConfig
+	decoder := json.NewDecoder(strings.NewReader(string(content)))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&axis); err != nil {
+		return fmt.Errorf("decode fight axis json: %w", err)
+	}
+	if axis.Version <= 0 {
+		return fmt.Errorf("version must be positive")
+	}
+	if strings.TrimSpace(axis.Name) == "" {
+		return fmt.Errorf("name is empty")
+	}
+	if strings.TrimSpace(axis.BattleMode) == "" {
+		return fmt.Errorf("battle_mode is empty")
+	}
+	if axis.OperatorCount <= 0 {
+		return fmt.Errorf("operator_count must be positive")
+	}
+	for index, cast := range axis.ImmediateCast {
+		if err := validateFightAxisCast(cast); err != nil {
+			return fmt.Errorf("immediate_cast[%d]: %w", index, err)
+		}
+	}
+	for index, cast := range axis.SequentialCast {
+		if err := validateFightAxisCast(cast); err != nil {
+			return fmt.Errorf("sequential_cast[%d]: %w", index, err)
+		}
+	}
+	return nil
+}
+
+func validateFightAxisCast(cast fightAxisCast) error {
+	if strings.TrimSpace(cast.Type) == "" {
+		return fmt.Errorf("type is empty")
+	}
+	switch cast.Type {
+	case "combo":
+		if cast.OperatorID != 0 {
+			return fmt.Errorf("combo must not set operator_id")
+		}
+	case "skill", "ultimate":
+		if cast.OperatorID <= 0 {
+			return fmt.Errorf("operator_id must be positive for %s", cast.Type)
+		}
+	default:
+		return fmt.Errorf("unsupported type %q", cast.Type)
+	}
+	return nil
+}
+
+func restoreDefaultFightAxis() error {
+	content, err := os.ReadFile(resolveFightAxisPath(fightAxisDefaultFile))
+	if err != nil {
+		return fmt.Errorf("read default fight axis: %w", err)
+	}
+	if err := validateFightAxisContent(content); err != nil {
+		return fmt.Errorf("validate default fight axis: %w", err)
 	}
 	if err := os.WriteFile(resolveFightAxisPath(fightAxisUserFile), content, 0644); err != nil {
-		log.Error().Err(err).Str("path", selectedPath).Msg("failed to overwrite custom fight axis file")
-		showMessageBox("提示", "写入自定义排轴文件失败")
-		return false
+		return fmt.Errorf("write default fight axis to user file: %w", err)
 	}
-	showMessageBox("提示", "导入自定义排轴文件成功")
-	return true
+	return nil
 }
 
 func resolveFightAxisPath(relativePath string) string {
@@ -106,15 +273,6 @@ func pickJSONFile() (string, error) {
 		return "", fmt.Errorf("no file selected")
 	}
 	return path, nil
-}
-
-func showMessageBox(title, message string) {
-	if runtime.GOOS != "windows" {
-		log.Info().Str("title", title).Str("message", message).Msg("message box fallback")
-		return
-	}
-	ps := fmt.Sprintf("Add-Type -AssemblyName PresentationFramework | Out-Null; [System.Windows.MessageBox]::Show('%s','%s') | Out-Null", escapePowerShellString(message), escapePowerShellString(title))
-	_ = exec.Command("powershell", "-NoProfile", "-STA", "-Command", ps).Run()
 }
 
 func escapePowerShellString(value string) string {
