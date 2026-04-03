@@ -1,0 +1,46 @@
+{
+    "version": 1,
+    "name": "defaultAxis",
+    "description": "默认排轴：先处理连携技，其次按 1~4 号干员轮转终结技与战技。",
+    "battle_mode": "realtime",
+    "operator_count": 4,
+    "immediate_cast": [
+        {
+            "type": "combo"
+        },
+        {
+            "type": "ultimate",
+            "operator_id": 1
+        },
+        {
+            "type": "ultimate",
+            "operator_id": 2
+        },
+        {
+            "type": "ultimate",
+            "operator_id": 3
+        },
+        {
+            "type": "ultimate",
+            "operator_id": 4
+        }
+    ],
+    "sequential_cast": [
+        {
+            "type": "skill",
+            "operator_id": 1
+        },
+        {
+            "type": "skill",
+            "operator_id": 2
+        },
+        {
+            "type": "skill",
+            "operator_id": 3
+        },
+        {
+            "type": "skill",
+            "operator_id": 4
+        },
+    ]
+}

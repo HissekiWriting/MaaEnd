@@ -10,7 +10,8 @@
                 "ProtocolSpaceSuccessCount",
                 "ProtocolSpaceFailedCount",
                 "ProtocolSpaceUsePermit",
-                "ProtocolSpaceTab"
+                "ProtocolSpaceTab",
+                "ProtocolSpaceFightAxisPreset"
             ],
             "controller": [
                 "Win32-Front"
@@ -301,6 +302,21 @@
                     "option": [
                         "CrisisDrills"
                     ]
+                }
+            ]
+        },
+        "ProtocolSpaceFightAxisPreset": {
+            "type": "select",
+            "label": "$option.ProtocolSpaceFightAxisPreset.label",
+            "default_case": "ProtocolSpaceFightAxisPresetDefault",
+            "cases": [
+                {
+                    "name": "ProtocolSpaceFightAxisPresetDefault",
+                    "label": "$option.ProtocolSpaceFightAxisPreset.case.ProtocolSpaceFightAxisPresetDefault.label"
+                },
+                {
+                    "name": "ProtocolSpaceFightAxisPresetCustom",
+                    "label": "$option.ProtocolSpaceFightAxisPreset.case.ProtocolSpaceFightAxisPresetCustom.label"
                 }
             ]
         },

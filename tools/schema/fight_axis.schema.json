@@ -36,13 +36,13 @@
         },
         "operator_count": {
             "type": "integer",
-            "minimum": 1,
+            "minimum": 4,
             "maximum": 4,
             "description": "参与排轴的干员数量"
         },
         "immediate_cast": {
             "type": "array",
-            "description": "检测到满足条件时立刻释放的技能列表，仅允许终结技，且不得与 sequential_cast 重复",
+            "description": "检测到满足条件时立刻释放的技能列表，仅允许终结技和连携技，且不得与 sequential_cast 重复",
             "items": {
                 "$ref": "#/$defs/immediateCastItem"
             },
@@ -62,6 +62,396 @@
             "additionalProperties": true
         }
     },
+    "allOf": [
+        {
+            "not": {
+                "required": [
+                    "immediate_cast",
+                    "sequential_cast"
+                ],
+                "properties": {
+                    "immediate_cast": {
+                        "contains": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "const": "combo"
+                                }
+                            },
+                            "required": [
+                                "type"
+                            ]
+                        }
+                    },
+                    "sequential_cast": {
+                        "contains": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "const": "combo"
+                                }
+                            },
+                            "required": [
+                                "type"
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "not": {
+                "required": [
+                    "immediate_cast",
+                    "sequential_cast"
+                ],
+                "properties": {
+                    "immediate_cast": {
+                        "contains": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "const": "skill"
+                                },
+                                "operator_id": {
+                                    "const": 1
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "operator_id"
+                            ]
+                        }
+                    },
+                    "sequential_cast": {
+                        "contains": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "const": "skill"
+                                },
+                                "operator_id": {
+                                    "const": 1
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "operator_id"
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "not": {
+                "required": [
+                    "immediate_cast",
+                    "sequential_cast"
+                ],
+                "properties": {
+                    "immediate_cast": {
+                        "contains": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "const": "skill"
+                                },
+                                "operator_id": {
+                                    "const": 2
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "operator_id"
+                            ]
+                        }
+                    },
+                    "sequential_cast": {
+                        "contains": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "const": "skill"
+                                },
+                                "operator_id": {
+                                    "const": 2
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "operator_id"
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "not": {
+                "required": [
+                    "immediate_cast",
+                    "sequential_cast"
+                ],
+                "properties": {
+                    "immediate_cast": {
+                        "contains": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "const": "skill"
+                                },
+                                "operator_id": {
+                                    "const": 3
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "operator_id"
+                            ]
+                        }
+                    },
+                    "sequential_cast": {
+                        "contains": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "const": "skill"
+                                },
+                                "operator_id": {
+                                    "const": 3
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "operator_id"
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "not": {
+                "required": [
+                    "immediate_cast",
+                    "sequential_cast"
+                ],
+                "properties": {
+                    "immediate_cast": {
+                        "contains": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "const": "skill"
+                                },
+                                "operator_id": {
+                                    "const": 4
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "operator_id"
+                            ]
+                        }
+                    },
+                    "sequential_cast": {
+                        "contains": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "const": "skill"
+                                },
+                                "operator_id": {
+                                    "const": 4
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "operator_id"
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "not": {
+                "required": [
+                    "immediate_cast",
+                    "sequential_cast"
+                ],
+                "properties": {
+                    "immediate_cast": {
+                        "contains": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "const": "ultimate"
+                                },
+                                "operator_id": {
+                                    "const": 1
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "operator_id"
+                            ]
+                        }
+                    },
+                    "sequential_cast": {
+                        "contains": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "const": "ultimate"
+                                },
+                                "operator_id": {
+                                    "const": 1
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "operator_id"
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "not": {
+                "required": [
+                    "immediate_cast",
+                    "sequential_cast"
+                ],
+                "properties": {
+                    "immediate_cast": {
+                        "contains": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "const": "ultimate"
+                                },
+                                "operator_id": {
+                                    "const": 2
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "operator_id"
+                            ]
+                        }
+                    },
+                    "sequential_cast": {
+                        "contains": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "const": "ultimate"
+                                },
+                                "operator_id": {
+                                    "const": 2
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "operator_id"
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "not": {
+                "required": [
+                    "immediate_cast",
+                    "sequential_cast"
+                ],
+                "properties": {
+                    "immediate_cast": {
+                        "contains": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "const": "ultimate"
+                                },
+                                "operator_id": {
+                                    "const": 3
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "operator_id"
+                            ]
+                        }
+                    },
+                    "sequential_cast": {
+                        "contains": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "const": "ultimate"
+                                },
+                                "operator_id": {
+                                    "const": 3
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "operator_id"
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "not": {
+                "required": [
+                    "immediate_cast",
+                    "sequential_cast"
+                ],
+                "properties": {
+                    "immediate_cast": {
+                        "contains": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "const": "ultimate"
+                                },
+                                "operator_id": {
+                                    "const": 4
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "operator_id"
+                            ]
+                        }
+                    },
+                    "sequential_cast": {
+                        "contains": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "const": "ultimate"
+                                },
+                                "operator_id": {
+                                    "const": 4
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "operator_id"
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    ],
     "$defs": {
         "skillType": {
             "type": "string",
@@ -76,7 +466,7 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 4,
-            "description": "角色对象 id，限制为 1~4 的正整数"
+            "description": "角色对象 id, 限制为 1~4 的正整数"
         },
         "skillRef": {
             "type": "object",
@@ -94,48 +484,113 @@
                 }
             }
         },
+        "comboImmediateCastItem": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "type"
+            ],
+            "properties": {
+                "type": {
+                    "const": "combo"
+                }
+            }
+        },
+        "comboSequentialCastItem": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "type",
+                "window_ms"
+            ],
+            "properties": {
+                "type": {
+                    "const": "combo"
+                },
+                "window_ms": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "可执行时间窗，单位毫秒"
+                },
+                "delay_ms": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "相对前一个排轴动作的延迟，单位毫秒"
+                },
+                "priority": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "同一时刻的内部优先级，数值越大优先级越高"
+                },
+                "trigger": {
+                    "type": "object",
+                    "description": "触发条件扩展，供后续接入阶段、血量、能量等约束",
+                    "additionalProperties": true
+                }
+            }
+        },
         "immediateCastItem": {
-            "allOf": [
+            "oneOf": [
                 {
                     "$ref": "#/$defs/skillRef"
                 },
                 {
-                    "properties": {
-                        "type": {
-                            "const": "ultimate"
-                        }
-                    }
+                    "$ref": "#/$defs/comboImmediateCastItem"
                 }
             ]
         },
         "sequentialCastItem": {
-            "allOf": [
+            "oneOf": [
                 {
-                    "$ref": "#/$defs/skillRef"
+                    "allOf": [
+                        {
+                            "$ref": "#/$defs/skillRef"
+                        },
+                        {
+                            "properties": {
+                                "delay_ms": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "description": "相对前一个排轴动作的延迟，单位毫秒"
+                                },
+                                "window_ms": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "description": "可执行时间窗，单位毫秒"
+                                },
+                                "priority": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "description": "同一时刻的内部优先级，数值越大优先级越高"
+                                },
+                                "trigger": {
+                                    "type": "object",
+                                    "description": "触发条件扩展，供后续接入阶段、血量、能量等约束",
+                                    "additionalProperties": true
+                                }
+                            }
+                        },
+                        {
+                            "if": {
+                                "properties": {
+                                    "type": {
+                                        "const": "ultimate"
+                                    }
+                                },
+                                "required": [
+                                    "type"
+                                ]
+                            },
+                            "then": {
+                                "required": [
+                                    "window_ms"
+                                ]
+                            }
+                        }
+                    ]
                 },
                 {
-                    "properties": {
-                        "delay_ms": {
-                            "type": "integer",
-                            "minimum": 0,
-                            "description": "相对前一个排轴动作的延迟，单位毫秒"
-                        },
-                        "window_ms": {
-                            "type": "integer",
-                            "minimum": 0,
-                            "description": "可执行时间窗，单位毫秒"
-                        },
-                        "priority": {
-                            "type": "integer",
-                            "minimum": 0,
-                            "description": "同一时刻的内部优先级，数值越大优先级越高"
-                        },
-                        "trigger": {
-                            "type": "object",
-                            "description": "触发条件扩展，供后续接入阶段、血量、能量等约束",
-                            "additionalProperties": true
-                        }
-                    }
+                    "$ref": "#/$defs/comboSequentialCastItem"
                 }
             ]
         }

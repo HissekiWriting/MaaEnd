@@ -26,8 +26,10 @@
 
 协议分为两类内容板块：
 
-- `immediate_cast`：检测到满足条件时立刻释放的技能列表。仅允许 `ultimate`。
+- `immediate_cast`：检测到满足条件时立刻释放的技能列表。仅允许 `ultimate` 和 `combo`。
 - `sequential_cast`：依次释放的技能列表。允许 `skill`、`combo`、`ultimate`，但不得与 `immediate_cast` 有交集。
+
+注意：如果 `sequential_cast` 中的条目类型是 `ultimate`，则必须同时提供 `window_ms`。
 
 ### 2.3 推荐的扩展字段
 
@@ -70,7 +72,7 @@
     "name": "ExampleAxis",
     "description": "示例排轴",
     "battle_mode": "realtime",
-    "operator_count": 4,
+    "operator_count": 4,    // 由于目前项目只支持 4 人作战, 此处仅限填 4
     "immediate_cast": [
         {
             "type": "ultimate",

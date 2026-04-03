@@ -1,0 +1,9 @@
+{
+    "version": 1,
+    "name": "userAxis",
+    "description": "用户自定义排轴",
+    "battle_mode": "realtime",
+    "operator_count": 4,
+    "immediate_cast": [],
+    "sequential_cast": []
+}

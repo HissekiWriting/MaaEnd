@@ -17,6 +17,7 @@ import (
 	"github.com/MaaXYZ/MaaEnd/agent/go-service/itemtransfer"
 	maptracker "github.com/MaaXYZ/MaaEnd/agent/go-service/map-tracker"
 	"github.com/MaaXYZ/MaaEnd/agent/go-service/pkg/resource"
+	"github.com/MaaXYZ/MaaEnd/agent/go-service/protocolspace"
 	puzzle "github.com/MaaXYZ/MaaEnd/agent/go-service/puzzle-solver"
 	"github.com/MaaXYZ/MaaEnd/agent/go-service/quantizedsliding"
 	"github.com/MaaXYZ/MaaEnd/agent/go-service/resell"
@@ -50,6 +51,7 @@ func registerAll() {
 	blueprintimport.Register()
 	resell.Register()
 	puzzle.Register()
+	protocolspace.Register()
 	quantizedsliding.Register()
 	essencefilter.Register()
 	dailyrewards.Register()

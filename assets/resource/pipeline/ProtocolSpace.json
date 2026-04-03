@@ -4,8 +4,52 @@
         "pre_delay": 0,
         "post_delay": 0,
         "next": [
+            "ProtocolSpaceFightAxisLoadDefault",
+            "ProtocolSpaceFightAxisLoadCustom",
+            "ProtocolSpaceFightAxisCopyAction",
+            "ProtocolSpaceFightAxisImportAction",
             "ProtocolSpaceOperationalManualOpen",
             "[JumpBack]SceneEnterMenuOperationalManual"
+        ]
+    },
+    "ProtocolSpaceFightAxisLoadDefault": {
+        "desc": "激活默认排轴",
+        "recognition": "DirectHit",
+        "action": "Custom",
+        "custom_action": "ProtocolSpaceFightAxisLoadDefaultAction",
+        "enabled": false,
+        "next": [
+            "ProtocolSpaceOperationalManualOpen"
+        ]
+    },
+    "ProtocolSpaceFightAxisLoadCustom": {
+        "desc": "激活自定义排轴",
+        "recognition": "DirectHit",
+        "action": "Custom",
+        "custom_action": "ProtocolSpaceFightAxisLoadCustomAction",
+        "enabled": false,
+        "next": [
+            "ProtocolSpaceOperationalManualOpen"
+        ]
+    },
+    "ProtocolSpaceFightAxisCopyAction": {
+        "desc": "复制自定义排轴文件内容到剪切板",
+        "recognition": "DirectHit",
+        "action": "Custom",
+        "custom_action": "ProtocolSpaceFightAxisCopyAction",
+        "enabled": false,
+        "next": [
+            "ProtocolSpaceOperationalManualOpen"
+        ]
+    },
+    "ProtocolSpaceFightAxisImportAction": {
+        "desc": "导入自定义排轴文件",
+        "recognition": "DirectHit",
+        "action": "Custom",
+        "custom_action": "ProtocolSpaceFightAxisImportAction",
+        "enabled": false,
+        "next": [
+            "ProtocolSpaceOperationalManualOpen"
         ]
     }
 }

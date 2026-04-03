@@ -31,6 +31,15 @@
         },
         {
             "fileMatch": [
+                "/assets/fight_axis/**/*.jsonc",
+                "/assets/fight_axis/**/*.json",
+                "/install/fight_axis/**/*.jsonc",
+                "/install/fight_axis/**/*.json"
+            ],
+            "url": "/tools/schema/fight_axis.schema.json"
+        },
+        {
+            "fileMatch": [
                 "/install/config/maa_pi_config.json"
             ],
             "url": "/tools/schema/interface_config.schema.json"
